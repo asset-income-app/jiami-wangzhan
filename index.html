@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>军事装备展示平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            border-bottom: 2px solid #2d4a3e;
+            margin-bottom: 40px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: #4a9c6d;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px rgba(74, 156, 109, 0.5);
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #8a8a8a;
+            font-size: 1rem;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            padding: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8rem;
+                letter-spacing: 2px;
+            }
+        }
+
+        .product-card {
+            background: linear-gradient(145deg, #1e2a1e 0%, #252525 100%);
+            border: 2px solid #3d5a4a;
+            border-radius: 4px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .product-card:hover {
+            border-color: #4a9c6d;
+            box-shadow: 0 0 20px rgba(74, 156, 109, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .product-card.hidden {
+            display: none;
+        }
+
+        .product-image {
+            height: 200px;
+            background: linear-gradient(135deg, #2a3a2a 0%, #1a2a1a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #3d5a4a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(74, 156, 109, 0.03) 10px,
+                rgba(74, 156, 109, 0.03) 20px
+            );
+        }
+
+        .product-icon {
+            font-size: 4rem;
+            color: #4a9c6d;
+            opacity: 0.8;
+            z-index: 1;
+        }
+
+        .product-info {
+            padding: 25px;
+        }
+
+        .product-name {
+            font-size: 1.4rem;
+            color: #4a9c6d;
+            margin-bottom: 12px;
+            font-weight: 600;
+            border-left: 3px solid #4a9c6d;
+            padding-left: 12px;
+        }
+
+        .product-desc {
+            color: #a0a0a0;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        .contact-btn {
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #2d4a3e 0%, #1a3a2a 100%);
+            border: 1px solid #4a9c6d;
+            color: #4a9c6d;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .contact-btn:hover {
+            background: linear-gradient(135deg, #4a9c6d 0%, #2d6a4e 100%);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(74, 156, 109, 0.4);
+        }
+
+        .contact-btn:active {
+            transform: scale(0.98);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #1e2a1e 0%, #252525 100%);
+            border: 2px solid #4a9c6d;
+            border-radius: 4px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(74, 156, 109, 0.3);
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: #4a9c6d;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .modal-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #3d5a4a;
+        }
+
+        .modal-info p {
+            margin-bottom: 12px;
+            color: #c0c0c0;
+        }
+
+        .modal-info p:last-child {
+            margin-bottom: 0;
+        }
+
+        .email-address {
+            color: #4a9c6d;
+            font-weight: 600;
+            font-size: 1.1rem;
+            word-break: break-all;
+        }
+
+        .product-name-display {
+            color: #4a9c6d;
+            font-weight: 600;
+        }
+
+        .warning-text {
+            color: #d4a574;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .countdown {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #3d5a4a;
+            color: #8a8a8a;
+        }
+
+        .countdown-number {
+            color: #4a9c6d;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+            border-top: 2px solid #2d4a3e;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .legal-notice {
+            color: #6a6a6a;
+            font-size: 0.85rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+            padding: 15px;
+            border: 1px solid #3d5a4a;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #3d5a4a;
+            border-top-color: #4a9c6d;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .no-products {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6a6a6a;
+        }
+
+        .no-products p {
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>军事装备展示平台</h1>
+            <p>专业军事装备信息展示 | 全球防务解决方案</p>
+        </header>
+
+        <main>
+            <div class="products-grid" id="productsGrid"></div>
+            <div class="no-products" id="noProducts" style="display: none;">
+                <p>您已联系过所有产品，感谢您的关注！</p>
+            </div>
+        </main>
+
+        <footer>
+            <div class="legal-notice">
+                本网站仅展示公开信息，所有产品仅供参考。联系前请确认具备合法资质。<br>
+                本平台不收集任何用户个人信息，所有交互均在前端完成。
+            </div>
+        </footer>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <h2 class="modal-title">联系厂家</h2>
+            <div class="modal-info">
+                <p>产品：<span class="product-name-display" id="modalProductName"></span></p>
+                <p>请发送邮件至：<br><span class="email-address" id="emailAddress">正在获取临时邮箱...</span></p>
+                <p>邮件标题请注明：产品名称 + 您的需求</p>
+                <p>厂家将在 24 小时内回复您。</p>
+                <p class="warning-text" id="warningText" style="display: none;"></p>
+            </div>
+            <div class="countdown">
+                窗口将在 <span class="countdown-number" id="countdown">3</span> 秒后自动关闭
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            var PRODUCTS = [
+                {
+                    id: 'product-1',
+                    name: '天眼-3 侦察无人机',
+                    description: '长航时、隐身设计，适用于边境巡逻。采用先进复合材料机身，配备高精度侦察设备，续航时间可达24小时。',
+                    icon: '✈'
+                },
+                {
+                    id: 'product-2',
+                    name: '玄武-2 装甲车',
+                    description: '4x4 全地形，防雷等级达到 STANAG 4569 标准。模块化设计，可快速配置为指挥车、救护车等多种型号。',
+                    icon: '🛡'
+                },
+                {
+                    id: 'product-3',
+                    name: '闪电-7 防空系统',
+                    description: '近程防空导弹系统，可拦截无人机和巡航导弹。全天候作战能力，反应时间小于5秒，拦截成功率高达95%。',
+                    icon: '⚡'
+                },
+                {
+                    id: 'product-4',
+                    name: '幽灵-1 单兵外骨骼',
+                    description: '增强士兵负重能力，内置 AI 辅助瞄准。续航8小时，可负重50公斤行进，显著提升单兵作战效能。',
+                    icon: '👤'
+                }
+            ];
+
+            var FALLBACK_EMAIL = 'contact@example.com';
+            var CONTACTED_KEY = 'military_products_contacted';
+
+            function getContactedProducts() {
+                try {
+                    var data = localStorage.getItem(CONTACTED_KEY);
+                    return data ? JSON.parse(data) : [];
+                } catch (e) {
+                    console.error('读取 localStorage 失败:', e);
+                    return [];
+                }
+            }
+
+            function saveContactedProduct(productId) {
+                try {
+                    var contacted = getContactedProducts();
+                    if (contacted.indexOf(productId) === -1) {
+                        contacted.push(productId);
+                        localStorage.setItem(CONTACTED_KEY, JSON.stringify(contacted));
+                    }
+                } catch (e) {
+                    console.error('保存到 localStorage 失败:', e);
+                }
+            }
+
+            function createProductCard(product) {
+                var card = document.createElement('div');
+                card.className = 'product-card';
+                card.id = product.id;
+
+                card.innerHTML = 
+                    '<div class="product-image">' +
+                        '<span class="product-icon">' + product.icon + '</span>' +
+                    '</div>' +
+                    '<div class="product-info">' +
+                        '<h3 class="product-name">' + product.name + '</h3>' +
+                        '<p class="product-desc">' + product.description + '</p>' +
+                        '<button class="contact-btn" data-product-id="' + product.id + '" data-product-name="' + product.name + '">联系厂家</button>' +
+                    '</div>';
+
+                return card;
+            }
+
+            function renderProducts() {
+                var grid = document.getElementById('productsGrid');
+                var noProducts = document.getElementById('noProducts');
+                var contacted = getContactedProducts();
+                var visibleCount = 0;
+
+                grid.innerHTML = '';
+
+                PRODUCTS.forEach(function(product) {
+                    var card = createProductCard(product);
+                    
+                    if (contacted.indexOf(product.id) !== -1) {
+                        card.classList.add('hidden');
+                    } else {
+                        visibleCount++;
+                    }
+                    
+                    grid.appendChild(card);
+                });
+
+                if (visibleCount === 0) {
+                    noProducts.style.display = 'block';
+                } else {
+                    noProducts.style.display = 'none';
+                }
+            }
+
+            function fetchTempEmail(callback) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', 'https://api.guerrillamail.com/ajax.php?f=get_email_address', true);
+                xhr.timeout = 5000;
+
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            try {
+                                var response = xhr.responseText;
+                                if (response && response.indexOf('@') !== -1) {
+                                    callback(null, response.trim());
+                                } else {
+                                    callback(new Error('无效的邮箱格式'), null);
+                                }
+                            } catch (e) {
+                                callback(e, null);
+                            }
+                        } else {
+                            callback(new Error('API 请求失败: ' + xhr.status), null);
+                        }
+                    }
+                };
+
+                xhr.ontimeout = function() {
+                    callback(new Error('API 请求超时'), null);
+                };
+
+                xhr.onerror = function() {
+                    callback(new Error('API 请求错误'), null);
+                };
+
+                try {
+                    xhr.send();
+                } catch (e) {
+                    callback(e, null);
+                }
+            }
+
+            function showModal(productName, email, isFallback) {
+                var overlay = document.getElementById('modalOverlay');
+                var productNameEl = document.getElementById('modalProductName');
+                var emailEl = document.getElementById('emailAddress');
+                var warningEl = document.getElementById('warningText');
+                var countdownEl = document.getElementById('countdown');
+
+                productNameEl.textContent = productName;
+                emailEl.textContent = email;
+
+                if (isFallback) {
+                    warningEl.textContent = '临时邮箱服务不可用，请使用备用邮箱';
+                    warningEl.style.display = 'block';
+                } else {
+                    warningEl.style.display = 'none';
+                }
+
+                overlay.classList.add('active');
+
+                var countdown = 3;
+                countdownEl.textContent = countdown;
+
+                var timer = setInterval(function() {
+                    countdown--;
+                    countdownEl.textContent = countdown;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(timer);
+                        hideModal();
+                    }
+                }, 1000);
+            }
+
+            function hideModal() {
+                var overlay = document.getElementById('modalOverlay');
+                overlay.classList.remove('active');
+            }
+
+            function handleContactClick(event) {
+                if (event.target.classList.contains('contact-btn')) {
+                    var productId = event.target.getAttribute('data-product-id');
+                    var productName = event.target.getAttribute('data-product-name');
+
+                    var card = document.getElementById(productId);
+                    if (card) {
+                        card.classList.add('hidden');
+                    }
+
+                    saveContactedProduct(productId);
+
+                    var visibleCards = document.querySelectorAll('.product-card:not(.hidden)');
+                    if (visibleCards.length === 0) {
+                        document.getElementById('noProducts').style.display = 'block';
+                    }
+
+                    fetchTempEmail(function(error, email) {
+                        var isFallback = false;
+                        var displayEmail = email;
+
+                        if (error || !email) {
+                            console.error('获取临时邮箱失败:', error);
+                            displayEmail = FALLBACK_EMAIL;
+                            isFallback = true;
+                        }
+
+                        showModal(productName, displayEmail, isFallback);
+                    });
+                }
+            }
+
+            function init() {
+                renderProducts();
+
+                document.getElementById('productsGrid').addEventListener('click', handleContactClick);
+
+                document.getElementById('modalOverlay').addEventListener('click', function(event) {
+                    if (event.target === this) {
+                        hideModal();
+                    }
+                });
+
+                document.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape') {
+                        hideModal();
+                    }
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
+</body>
+</html>
